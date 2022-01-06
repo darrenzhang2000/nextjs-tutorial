@@ -1,34 +1,33 @@
 import React, { Fragment } from 'react'
 import MeetupDetail from '../../components/meetups/MeetupDetail'
+import { MongoClient, ObjectId } from 'mongodb'
+import { setUncaughtExceptionCaptureCallback } from 'process'
 
-const MeetupDetails = () => {
+const MeetupDetails = (props) => {
+    const { image, title, address, description } = props.meetupData
     return (
         <MeetupDetail
-            image='https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3SPDOv9ngD-19xo3aGTH0PdN6bHyybjnpRA&usqp=CAU'
-            title='A First Meetup'
-            address='Some Street 5, Some City'
-            description='The meetup description'
+            image={image}
+            title={title}
+            address={address}
+            description={description}
         />
     )
 }
 
 export async function getStaticPaths() {
+    const client = await MongoClient.connect('mongodb+srv://testuser:testuser123@cluster0.2z58v.mongodb.net/meetups?retryWrites=true&w=majority')
+    const db = client.db()
+
+    const meetupsCollection = db.collection('meetups')
+
+    const meetups = await meetupsCollection.find({}, { _id: 1 }).toArray()
+
+    client.close()
+
     return {
         fallback: false,
-        paths: [
-            {
-                params: {
-                    meetupId: "m1"
-                }
-            },
-
-            {
-                params: {
-                    meetupId: "m2"
-                }
-            },
-
-        ]
+        paths: meetups.map(meetup => ({ params: { meetupId: meetup._id.toString() } }))
     }
 }
 
@@ -37,15 +36,24 @@ export async function getStaticProps(context) {
 
     const meetupId = context.params.meetupId
 
-    console.log(meetupId)
+    const client = await MongoClient.connect('mongodb+srv://testuser:testuser123@cluster0.2z58v.mongodb.net/meetups?retryWrites=true&w=majority')
+    const db = client.db()
+
+    const meetupsCollection = db.collection('meetups')
+
+    const selectedMeetup = await meetupsCollection.findOne({ _id: ObjectId(meetupId) })
+
+    client.close()
+
+
     return {
         props: {
             meetupData: {
-                image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQ3SPDOv9ngD-19xo3aGTH0PdN6bHyybjnpRA&usqp=CAU',
-                id: meetupId,
-                title: 'A First Meetup',
-                address: 'Some Street 5, Some City',
-                description: 'The meetup description'
+                id: selectedMeetup._id.toString(),
+                title: selectedMeetup.title,
+                address: selectedMeetup.address,
+                image: selectedMeetup.image,
+                description: selectedMeetup.description
             }
         }
     }
