@@ -48,6 +48,22 @@ const HomePage = (props) => {
     )
 }
 
+// // server side code
+// export async function getServerSideProps(context){
+//     const req = context.req
+//     const res = context.res // like (req, res) from node.js
+
+//     // fetch data from an API
+//     return {
+//         props: {
+//             meetups: DUMMY_MEETUPS
+//         }
+//     }
+// }
+
+// getStaticProps is faster so use getServerSideProps only if data is changing frequently (multiple times a second)
+// or if you need access to req and res
+// server side code
 export async function getStaticProps() {
     // fetch data from an API
     return {
