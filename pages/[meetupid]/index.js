@@ -1,17 +1,22 @@
 import React, { Fragment } from 'react'
 import MeetupDetail from '../../components/meetups/MeetupDetail'
 import { MongoClient, ObjectId } from 'mongodb'
-import { setUncaughtExceptionCaptureCallback } from 'process'
-
+import Head from 'next/head'
 const MeetupDetails = (props) => {
     const { image, title, address, description } = props.meetupData
     return (
-        <MeetupDetail
-            image={image}
-            title={title}
-            address={address}
-            description={description}
-        />
+        <Fragment>
+            <Head>
+                <title>{props.meetupData.title}</title>
+                <meta name='description' content={props.meetupData.description}></meta>
+            </Head>
+            <MeetupDetail
+                image={image}
+                title={title}
+                address={address}
+                description={description}
+            />
+        </Fragment>
     )
 }
 
